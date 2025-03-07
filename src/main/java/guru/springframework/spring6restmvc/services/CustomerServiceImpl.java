@@ -68,13 +68,18 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateCustomer(UUID beerId, Customer customer) {
-        var existingCustomer = customers.get(beerId);
+    public void updateCustomer(UUID customerId, Customer customer) {
+        var existingCustomer = customers.get(customerId);
 
         existingCustomer.setCustomerName(customer.getCustomerName());
         existingCustomer.setLastModifiedDate(LocalDateTime.now());
         existingCustomer.setVersion(existingCustomer.getVersion() + 1);
 
         customers.put(existingCustomer.getId(), existingCustomer);
+    }
+
+    @Override
+    public void deleteById(UUID customerId) {
+        customers.remove(customerId);
     }
 }
