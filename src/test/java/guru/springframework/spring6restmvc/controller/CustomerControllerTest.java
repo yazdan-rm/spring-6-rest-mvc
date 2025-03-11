@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.spring6restmvc.model.Customer;
 import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
+import org.hamcrest.core.Is;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.hamcrest.core.Is;
+
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @WebMvcTest(CustomerController.class)
 class CustomerControllerTest {
@@ -35,6 +38,19 @@ class CustomerControllerTest {
     @BeforeEach
     void setUp() {
         customerServiceImpl = new CustomerServiceImpl();
+    }
+
+    @Test
+    void updateCustomerTest() throws Exception{
+        Customer customer = customerServiceImpl.listCustomers().getFirst();
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/customer/" + customer.getId())
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(customer)))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        verify(customerService).updateCustomer(any(UUID.class), any(Customer.class));
     }
 
     @Test
