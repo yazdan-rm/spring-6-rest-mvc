@@ -1,5 +1,6 @@
 package guru.springframework.spring6restmvc.services;
 
+import com.github.javafaker.Faker;
 import guru.springframework.spring6restmvc.model.Beer;
 import guru.springframework.spring6restmvc.model.BeerStyle;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -17,50 +20,29 @@ public class BeerServiceImpl implements BeerService {
     private final Map<UUID, Beer> beerMap;
 
     public BeerServiceImpl() {
+        // Faker is a class for making fake data for test
+        Faker faker = new Faker();
         beerMap = new HashMap<>();
-        Beer beer1 = Beer.builder()
-                .id(UUID.randomUUID())
-                .version(1)
-                .beerName("Galaxy Cat")
-                .beerStyle(BeerStyle.PALE_ALE)
-                .upc("12356")
-                .price(new BigDecimal("12.99"))
-                .quantityOnHand(122)
-                .createdDate(LocalDateTime.now())
-                .updateDate(LocalDateTime.now())
-                .build();
 
-        Beer beer2 = Beer.builder()
-                .id(UUID.randomUUID())
-                .version(1)
-                .beerName("Crank")
-                .beerStyle(BeerStyle.PALE_ALE)
-                .upc("12356222")
-                .price(new BigDecimal("11.99"))
-                .quantityOnHand(392)
-                .createdDate(LocalDateTime.now())
-                .updateDate(LocalDateTime.now())
-                .build();
+        List<Beer> beerList = Stream.generate(() -> Beer.builder()
+                        .id(UUID.randomUUID())
+                        .version(1)
+                        .beerName(faker.beer().name())
+                        .beerStyle(BeerStyle.values()[new Random().nextInt(BeerStyle.values().length)])
+                        .upc(String.valueOf(faker.number().numberBetween(1000, 10000)))
+                        .price(new BigDecimal(faker.commerce().price()))
+                        .quantityOnHand(faker.number().numberBetween(100, 1000))
+                        .createdDate(LocalDateTime.now())
+                        .updateDate(LocalDateTime.now())
+                        .build())
+                .limit(3)
+                .toList();
 
-        Beer beer3 = Beer.builder()
-                .id(UUID.randomUUID())
-                .version(1)
-                .beerName("Sunshine City")
-                .beerStyle(BeerStyle.IPA)
-                .upc("12356")
-                .price(new BigDecimal("13.99"))
-                .quantityOnHand(144)
-                .createdDate(LocalDateTime.now())
-                .updateDate(LocalDateTime.now())
-                .build();
-
-        beerMap.put(beer1.getId(), beer1);
-        beerMap.put(beer2.getId(), beer2);
-        beerMap.put(beer3.getId(), beer3);
+        beerList.forEach(beer -> beerMap.put(beer.getId(), beer));
     }
 
     @Override
-    public List<Beer> listBeers(){
+    public List<Beer> listBeers() {
         return new ArrayList<>(beerMap.values());
     }
 
@@ -107,23 +89,23 @@ public class BeerServiceImpl implements BeerService {
     public void patchBeerById(UUID beerId, Beer beer) {
         Beer existing = beerMap.get(beerId);
 
-        if(StringUtils.hasText(beer.getBeerName())){
+        if (StringUtils.hasText(beer.getBeerName())) {
             existing.setBeerName(beer.getBeerName());
         }
 
-        if(beer.getBeerStyle() != null){
+        if (beer.getBeerStyle() != null) {
             existing.setBeerStyle(beer.getBeerStyle());
         }
 
-        if(beer.getPrice() != null){
+        if (beer.getPrice() != null) {
             existing.setPrice(beer.getPrice());
         }
 
-        if(beer.getQuantityOnHand() != null){
+        if (beer.getQuantityOnHand() != null) {
             existing.setQuantityOnHand(beer.getQuantityOnHand());
         }
 
-        if(StringUtils.hasText(beer.getUpc())){
+        if (StringUtils.hasText(beer.getUpc())) {
             existing.setUpc(beer.getUpc());
         }
 
