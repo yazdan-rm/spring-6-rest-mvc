@@ -1,6 +1,7 @@
 package guru.springframework.spring6restmvc.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.springframework.spring6restmvc.constant.RestConstant;
 import guru.springframework.spring6restmvc.model.Beer;
 import guru.springframework.spring6restmvc.services.BeerService;
 import guru.springframework.spring6restmvc.services.BeerServiceImpl;
@@ -41,17 +42,15 @@ class BeerControllerTest {
     BeerService beerService;
 
     BeerServiceImpl beerServiceImpl;
+    @Captor
+    ArgumentCaptor<UUID> uuidArgumentCaptor;
+    @Captor
+    ArgumentCaptor<Beer> beerArgumentCaptor;
 
     @BeforeEach
     void setUp() {
         beerServiceImpl = new BeerServiceImpl();
     }
-
-    @Captor
-    ArgumentCaptor<UUID> uuidArgumentCaptor;
-
-    @Captor
-    ArgumentCaptor<Beer> beerArgumentCaptor;
 
     @Test
     void testPatchBeer() throws Exception {
@@ -60,10 +59,10 @@ class BeerControllerTest {
         Map<String, Object> beerMap = new HashMap<>();
         beerMap.put("beerName", "New Name");
 
-        mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/beer/" + beer.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(beerMap)))
+        mockMvc.perform(MockMvcRequestBuilders.patch(RestConstant.BEER_URL + "/" + beer.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(beerMap)))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         verify(beerService).patchBeerById(uuidArgumentCaptor.capture(), beerArgumentCaptor.capture());
@@ -75,7 +74,7 @@ class BeerControllerTest {
     @Test
     void testDeleteBeer() throws Exception {
         Beer beer = beerServiceImpl.listBeers().getFirst();
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/beer/" + beer.getId())
+        mockMvc.perform(MockMvcRequestBuilders.delete(RestConstant.BEER_URL + "/" + beer.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
@@ -85,10 +84,10 @@ class BeerControllerTest {
     }
 
     @Test
-    void updateById() throws Exception{
+    void updateById() throws Exception {
         Beer beer = beerServiceImpl.listBeers().getFirst();
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/beer/" + beer.getId())
+        mockMvc.perform(MockMvcRequestBuilders.put(RestConstant.BEER_URL + "/" + beer.getId())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(beer)))
@@ -105,10 +104,10 @@ class BeerControllerTest {
 
         given(beerService.saveNewBeer(any(Beer.class))).willReturn(beerServiceImpl.listBeers().get(1));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/beer")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(beer)))
+        mockMvc.perform(MockMvcRequestBuilders.post(RestConstant.BEER_URL)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(beer)))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.header().exists("Location"));
     }
@@ -117,8 +116,8 @@ class BeerControllerTest {
     void testListBeers() throws Exception {
         given(beerService.listBeers()).willReturn(beerServiceImpl.listBeers());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/beer")
-                .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.get(RestConstant.BEER_URL)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()", Is.is(3)));
@@ -131,7 +130,7 @@ class BeerControllerTest {
 
         given(beerService.getBeerById(testBeer.getId())).willReturn(testBeer);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/beer/" + testBeer.getId())
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/beer/" + "/" + testBeer.getId())
                         .header("authorization", "put token here ...")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
