@@ -1,6 +1,7 @@
 package guru.springframework.spring6restmvc.controller;
 
 import guru.springframework.spring6restmvc.constant.RestConstant;
+import guru.springframework.spring6restmvc.exception.NotFoundException;
 import guru.springframework.spring6restmvc.model.Beer;
 import guru.springframework.spring6restmvc.services.BeerService;
 import lombok.RequiredArgsConstructor;
@@ -54,12 +55,6 @@ public class BeerController {
     @GetMapping
     public List<Beer> listBeers(){
         return beerService.listBeers();
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Void> handleNotFoundException(){
-        System.out.println(" not found exception");
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("{beerId}")

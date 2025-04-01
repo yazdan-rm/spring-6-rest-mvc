@@ -1,6 +1,8 @@
 package guru.springframework.spring6restmvc.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.springframework.spring6restmvc.constant.RestConstant;
+import guru.springframework.spring6restmvc.exception.NotFoundException;
 import guru.springframework.spring6restmvc.model.Customer;
 import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
@@ -129,12 +131,20 @@ class CustomerControllerTest {
     }
 
     @Test
+    void getCustomerByIdNotFound() throws Exception {
+        given(customerService.getCustomerById(any(UUID.class))).willThrow(NotFoundException.class);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(RestConstant.CUSTOMER_URL + "/" + UUID.randomUUID()))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
     void getCustomerById() throws Exception {
         Customer testCustomer = customerServiceImpl.listCustomers().getFirst();
 
         given(customerService.getCustomerById(testCustomer.getId())).willReturn(testCustomer);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/customer/" + testCustomer.getId())
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/ customer/" + testCustomer.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
