@@ -60,7 +60,7 @@ public class BeerController {
     @GetMapping("{beerId}")
     public Beer getBeerById(@PathVariable("beerId") UUID beerId) {
         log.debug("Get Beer Id - in controller -123");
-        Beer beerById = beerService.getBeerById(beerId);
+        Beer beerById = beerService.getBeerById(beerId).orElseThrow(NotFoundException::new);
         System.out.println(beerById);
         return beerById;
     }
