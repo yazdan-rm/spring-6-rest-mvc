@@ -2,8 +2,7 @@ package guru.springframework.spring6restmvc.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.spring6restmvc.constant.RestConstant;
-import guru.springframework.spring6restmvc.exception.NotFoundException;
-import guru.springframework.spring6restmvc.model.Customer;
+import guru.springframework.spring6restmvc.model.CustomerDTO;
 import guru.springframework.spring6restmvc.services.CustomerService;
 import guru.springframework.spring6restmvc.services.CustomerServiceImpl;
 import org.hamcrest.core.Is;
@@ -49,14 +48,14 @@ class CustomerControllerTest {
     }
 
     @Captor
-    ArgumentCaptor<Customer> customerArgumentCaptor;
+    ArgumentCaptor<CustomerDTO> customerArgumentCaptor;
 
     @Captor
     ArgumentCaptor<UUID> uuidArgumentCaptor;
 
     @Test
     void testPatchCustomerById() throws Exception {
-        Customer customer = customerServiceImpl.listCustomers().getFirst();
+        CustomerDTO customer = customerServiceImpl.listCustomers().getFirst();
 
         Map<String, Object> customerMap = new HashMap<>();
         customerMap.put("customerName", "new Name");
@@ -76,7 +75,7 @@ class CustomerControllerTest {
 
     @Test
     void testDeleteCustomerById() throws Exception {
-        Customer customer = customerServiceImpl.listCustomers().getFirst();
+        CustomerDTO customer = customerServiceImpl.listCustomers().getFirst();
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/customer/" + customer.getId())
                 .accept(MediaType.APPLICATION_JSON))
@@ -91,7 +90,7 @@ class CustomerControllerTest {
 
     @Test
     void updateCustomerTest() throws Exception{
-        Customer customer = customerServiceImpl.listCustomers().getFirst();
+        CustomerDTO customer = customerServiceImpl.listCustomers().getFirst();
 
         mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/customer/" + customer.getId())
                 .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -99,16 +98,16 @@ class CustomerControllerTest {
                 .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
 
-        verify(customerService).updateCustomer(any(UUID.class), any(Customer.class));
+        verify(customerService).updateCustomer(any(UUID.class), any(CustomerDTO.class));
     }
 
     @Test
     void handlePostRequest() throws Exception {
-        Customer customer = customerServiceImpl.listCustomers().getFirst();
+        CustomerDTO customer = customerServiceImpl.listCustomers().getFirst();
         customer.setVersion(null);
         customer.setId(null);
 
-        given(customerService.saveCustomer(any(Customer.class))).willReturn(customerServiceImpl.listCustomers().get(1));
+        given(customerService.saveCustomer(any(CustomerDTO.class))).willReturn(customerServiceImpl.listCustomers().get(1));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/customer")
                 .accept(MediaType.APPLICATION_JSON)
@@ -141,7 +140,7 @@ class CustomerControllerTest {
 
     @Test
     void getCustomerById() throws Exception {
-        Customer testCustomer = customerServiceImpl.listCustomers().getFirst();
+        CustomerDTO testCustomer = customerServiceImpl.listCustomers().getFirst();
 
         given(customerService.getCustomerById(testCustomer.getId())).willReturn(Optional.of(testCustomer));
 
