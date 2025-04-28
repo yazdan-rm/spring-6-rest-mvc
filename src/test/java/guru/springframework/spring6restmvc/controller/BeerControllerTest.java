@@ -43,8 +43,10 @@ class BeerControllerTest {
     BeerService beerService;
 
     BeerServiceImpl beerServiceImpl;
+
     @Captor
     ArgumentCaptor<UUID> uuidArgumentCaptor;
+
     @Captor
     ArgumentCaptor<BeerDTO> beerArgumentCaptor;
 

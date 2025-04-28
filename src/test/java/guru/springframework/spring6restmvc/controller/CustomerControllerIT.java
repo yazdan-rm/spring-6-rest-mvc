@@ -13,10 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -32,9 +32,7 @@ class CustomerControllerIT {
     void testGetCustomerById(){
         Customer customer = customerRepository.findAll().getFirst();
 
-        CustomerDTO customerDTO = customerController.getCustomerById(customer.getId());
-
-        assertNotNull(customerDTO);
+        assertThrows(NotFoundException.class, () -> customerController.getCustomerById(customer.getId()));
 
     }
 
@@ -71,7 +69,7 @@ class CustomerControllerIT {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(201));
         assertThat(responseEntity.getHeaders()).isNotNull();
 
-        String[] locationUUID = responseEntity.getHeaders().getLocation().getPath().split("/");
+        String[] locationUUID = Objects.requireNonNull(responseEntity.getHeaders().getLocation()).getPath().split("/");
         UUID saveUUID = UUID.fromString(locationUUID[locationUUID.length-1]);
 
         Customer customer = customerRepository.findById(saveUUID).get();
