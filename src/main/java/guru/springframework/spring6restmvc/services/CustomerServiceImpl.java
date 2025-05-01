@@ -10,7 +10,7 @@ import java.util.*;
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
-    private Map<UUID, CustomerDTO> customers;
+    private final Map<UUID, CustomerDTO> customers;
 
     public CustomerServiceImpl() {
         this.customers = new HashMap<>();
@@ -68,25 +68,26 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public void updateCustomer(UUID customerId, CustomerDTO customer) {
-        var existingCustomer = customers.get(customerId);
-
-        existingCustomer.setCustomerName(customer.getCustomerName());
-        existingCustomer.setLastModifiedDate(LocalDateTime.now());
-        existingCustomer.setVersion(existingCustomer.getVersion() + 1);
+    public Optional<CustomerDTO> updateCustomer(UUID customerId, CustomerDTO customer) {
+        CustomerDTO existing = customers.get(customerId);
+        existing.setCustomerName(customer.getCustomerName());
+        return  Optional.of(existing);
     }
 
     @Override
-    public void deleteById(UUID customerId) {
+    public Boolean deleteById(UUID customerId) {
         customers.remove(customerId);
+        return true;
     }
 
     @Override
-    public void patchCustomerById(UUID customerId, CustomerDTO customer) {
+    public Optional<CustomerDTO> patchCustomerById(UUID customerId, CustomerDTO customer) {
         var existingCustomer = customers.get(customerId);
 
         if(StringUtils.hasText(customer.getCustomerName())) {
             existingCustomer.setCustomerName(customer.getCustomerName());
         }
+
+        return  Optional.of(existingCustomer);
     }
 }
