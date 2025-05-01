@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -32,8 +31,31 @@ class BeerControllerIT {
     @Autowired
     BeerMapper beerMapper;
 
+    @Rollback
+    @Transactional
     @Test
-    void updateExistingBeer(){
+    void testDeleteByIdFound() {
+        Beer beer = beerRepository.findAll().getFirst();
+
+        ResponseEntity<BeerDTO> responseEntity = beerController.deleteById(beer.getId());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+        assertThat(beerRepository.findById(beer.getId())).isEmpty();
+
+//        Beer foundBeer = beerRepository.findById(beer.getId()).get();
+//        assertThat(foundBeer).isNull();
+    }
+
+    @Test
+    void testUpdateNotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            beerController.updateById(UUID.randomUUID(), BeerDTO.builder().build());
+        });
+    }
+
+    @Rollback
+    @Transactional
+    @Test
+    void updateExistingBeer() {
         Beer beer = beerRepository.findAll().getFirst();
         BeerDTO beerDTO = beerMapper.beerToBeerDTO(beer);
         beerDTO.setId(null);
@@ -51,7 +73,7 @@ class BeerControllerIT {
     @Rollback
     @Transactional
     @Test
-    void saveNewBeerTest(){
+    void saveNewBeerTest() {
         BeerDTO beerDTO = BeerDTO.builder()
                 .beerName("New Beer")
                 .build();
@@ -71,13 +93,13 @@ class BeerControllerIT {
 
     @Test
     void testBeerIdNotFound() {
-        assertThrows(NotFoundException.class, () ->{
+        assertThrows(NotFoundException.class, () -> {
             beerController.getBeerById(UUID.randomUUID());
         });
     }
 
     @Test
-    void testGetById(){
+    void testGetById() {
         Beer beer = beerRepository.findAll().getFirst();
 
         BeerDTO beerDTO = beerController.getBeerById(beer.getId());
